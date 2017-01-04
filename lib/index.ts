@@ -14,13 +14,13 @@ let jigsaw = new slackbots(settings);
 let d = new Deck();
 d.whatIsDeck();
 // jigsaw.on('start', () => {
-//     jigsaw.postMessageToChannel('flux', 'Hello channel!');
+//     jigsaw.postMessageToChannel('flux', `hello @iammiles`);
 //     jigsaw.postMessageToUser('iammiles', 'hello bro!');
 // });
 
 
 /**
- * TODO: randomly remove a card
- * make a players
+ * TODO:
+ * make players
  * deal card to players
  */
