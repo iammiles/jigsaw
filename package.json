@@ -1,0 +1,20 @@
+{
+  "name": "jigsaw",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run build:live",
+    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./lib/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^6.0.56",
+    "nodemon": "^1.11.0",
+    "slackbots": "^1.0.2",
+    "ts-node": "^2.0.0",
+    "typescript": "^2.1.4"
+  }
+}
