@@ -17,3 +17,10 @@ d.whatIsDeck();
 //     jigsaw.postMessageToChannel('flux', 'Hello channel!');
 //     jigsaw.postMessageToUser('iammiles', 'hello bro!');
 // });
+
+
+/**
+ * TODO: randomly remove a card
+ * make a players
+ * deal card to players
+ */

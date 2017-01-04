@@ -59,7 +59,10 @@ export class Deck {
   pile: Array<Card>
   constructor() {
     this.pile = Array<Card>();
-    // Initialize deck
+    this.initDeck();
+  }
+
+  private initDeck(): void {
     typesOfCards.forEach(card => this.addCardToDeck(card.qty, new Card(card.name, card.value, card.qty, card.description)));
   }
 
