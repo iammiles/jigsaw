@@ -9,7 +9,7 @@ export const jigsaw = new slackbots(BOT_SETTINGS);
 const g = new Game();
 
 jigsaw.on('start', () => {
- // jigsaw.postMessageToChannel(gameChannel, 'Who wants to play a game?');
+ spamChannel('Who wants to play a game?\nType "!join" or "!help" to get started.');
 });
 
 jigsaw.on('message', (data) => {
@@ -17,7 +17,7 @@ jigsaw.on('message', (data) => {
     Promise.all([isProperChannel(data.channel), getMessenger(data)]).then((res) => {
       const [isGameChannel, user] = res;
       const command = parseCommand(data.text);
-      if ((isGameChannel || data.channel.charAt(0) === 'D') && command[0].charAt(0) === '!') {
+      if (isGameChannel && command[0].charAt(0) === '!') {
         switch(command[0]) {
           case '!start':
             startGame(g.gameStatus === GameStatus.PreGame);
@@ -76,17 +76,11 @@ const relayPlayInfo = (playInfo: [boolean, string, Player ]): void => {
 
 const startGame = (isPreGame: boolean): void => {
   if (isPreGame) {
-    g.startGame();
-    spamChannel('Alright, let\'s play some Love Letter!');
     announcePlayers();
-    announceTurn();
+    g.startGame();
   } else {
     spamChannel('A game is already in progress!');
   }
-}
-
-const announceTurn = (): void => {
-  spamChannel(`${g.players[0].name}, it's your turn!`);
 }
 
 const announcePlayers = (): void => {
@@ -113,8 +107,3 @@ const isProperChannel = async (id: string): Promise<any> => {
 const parseCommand = (msg: string): Array<string> => {
   return msg.split(' ');
 }
-
-//@todo
-// proper onMessage handling
-//everyone is handmaidened
-//edge cases

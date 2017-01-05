@@ -36,6 +36,7 @@ export class Game {
     this.players = shuffle(this.players)
     this.players[0].isTurn = true;
     this.dealCardToPlayer(this.players[0]);
+    spamChannel(`${this.players[0].name} it's your turn!`);
   }
 
   newTurn(): void {
@@ -49,6 +50,7 @@ export class Game {
     this.players[0].isProtected = false;
     this.players.push(oldPlayer);
     this.dealCardToPlayer(this.players[0])
+    spamChannel(`${this.players[0].name} it's your turn!`);
   }
 
   dealCardsToPlayers(): void {
@@ -115,14 +117,16 @@ export class Game {
         return; 
       }
       // Valid attack with defender
-      this.resolvePlay(attacker, cardName, defender, guess)
+      this.resolvePlay(attacker, cardName, defender, guess); return;
     }
     // attacker didn't specify an opponent?  make sure they played a valid card.
     const cardsWithOutOpponent = typesOfCards.filter(card => card.requiresDefender === false);
+    console.log('cards', cardsWithOutOpponent);
     const properPlayWithOpponent: boolean = cardsWithOutOpponent.some(card => card.name.toUpperCase() === cardName.toUpperCase());
+    console.log('proper', properPlayWithOpponent);
     if (!properPlayWithOpponent) { spamUser(attacker.name, `${cardName} can't be used without specifying an opponent.`); return; }
     // Valid play without defender
-    this.resolvePlay(attacker, cardName);
+    this.resolvePlay(attacker, cardName); return;
   }
 
   getPlayerById(id: string): Player {
