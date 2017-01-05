@@ -25,8 +25,4 @@ export class Deck {
   dealCard(): Card {
     return this.pile.shift();
   }
-
-  whatIsDeck(): void {
-    this.pile.forEach(card => console.log(card.name))
-  }
 }

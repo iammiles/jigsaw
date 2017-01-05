@@ -1,7 +1,7 @@
 import { Deck } from './Deck';
-import { Card } from './Card';
+import { Card, typesOfCards } from './Card';
 import { Player } from './Player';
-import { shuffle, spamUser, spamChannel } from './utilities';
+import { shuffle, spamUser, spamChannel, wtf } from './utilities';
 
 export const enum GameStatus {
   PreGame,
@@ -46,8 +46,9 @@ export class Game {
     const oldPlayer = this.players.shift();
     oldPlayer.isTurn = false;
     this.players[0].isTurn = true;
-    this.dealCardToPlayer(this.players[0])
+    this.players[0].isProtected = false;
     this.players.push(oldPlayer);
+    this.dealCardToPlayer(this.players[0])
   }
 
   dealCardsToPlayers(): void {
@@ -83,27 +84,45 @@ export class Game {
     this.gameStatus = GameStatus.GameEnd;
   }
 
-  parsePlay(attacker: Player, cmd: Array<string>): [boolean, string, Player] {
-    //@todo check if it's actually attacker's turn && make this work
-    if (this.gameStatus !== GameStatus.GameStart) return [true, 'Game has not started yet!', attacker];
-    if (!attacker.isTurn) return [true, 'It\'s not your turn!', attacker];
+  validatePlay(attacker: Player, cmd: Array<string>): void {
+    // Validate game status and player's turn
+    if (this.gameStatus !== GameStatus.GameStart) { spamChannel('Game has not started yet!'); return; }
+    if (!attacker.isTurn) { spamUser(attacker.name, 'It\'s not your turn!'); return; }
+
     let [, cardName, defenderId, guess] = cmd;
-     // Validate cardName
-    console.log('attacker at parse play', attacker);
-    console.log('card valid', attacker.isValidCard(cardName));
-    if (!Boolean(cardName.trim()) || !attacker.isValidCard(cardName)) return [true, 'You picked an invalid card!', attacker];
+    // Validate cardName
+    if (!Boolean(cardName.trim()) || !attacker.isValidCard(cardName)) { spamUser(attacker.name, 'You picked an invalid card!'); return; }
 
     // Validate defender
-    // @todo check if all defenders are protected and defender isn't attacker for all cases except prince
     if (defenderId) {
       defenderId = defenderId.slice(2, -1);
-      console.log('defender id', defenderId);
       const defender: Player = this.getPlayerById(defenderId);
-      if (!defender || defender.isProtected) return [true, 'You picked an invalid opponent!', attacker];
-      return this.resolvePlay(attacker, cardName, defender, guess)
+      //check if we have a valid defender
+      if (!defender || defender.isProtected) { spamUser(attacker.name, 'You picked an invalid opponent!'); return; }
+
+      // check if defender isn't self in all cases but prince
+      // also check if everyone else is protected by handmaid.  in this case the only valid play against a defender is a prince against themself
+      if (defender === attacker && cardName.toUpperCase() !== 'PRINCE') {
+        const otherPlayers: Array<Player> = this.players.filter(player => player.name !== attacker.name);
+        const isEveryoneProtected: boolean = otherPlayers.filter(player => player.isProtected !== true).length === 0;
+        if (isEveryoneProtected) {
+          spamChannel(`Everyone is protected by handmaid.  Discarding ${cardName}`);
+          attacker.removeCard(cardName);
+          this.newTurn();
+          return;
+        }
+        spamUser(attacker.name, 'You can\'t pick yourself with that card!');
+        return; 
+      }
+      // Valid attack with defender
+      this.resolvePlay(attacker, cardName, defender, guess)
     }
-    
-    return this.resolvePlay(attacker, cardName);
+    // attacker didn't specify an opponent?  make sure they played a valid card.
+    const cardsWithOutOpponent = typesOfCards.filter(card => card.requiresDefender === false);
+    const properPlayWithOpponent: boolean = cardsWithOutOpponent.some(card => card.name.toUpperCase() === cardName.toUpperCase());
+    if (!properPlayWithOpponent) { spamUser(attacker.name, `${cardName} can't be used without specifying an opponent.`); return; }
+    // Valid play without defender
+    this.resolvePlay(attacker, cardName);
   }
 
   getPlayerById(id: string): Player {
@@ -126,85 +145,94 @@ export class Game {
     attacker.removeCard(cardName);
     switch (cardName.toUpperCase()) {
       case 'GUARD':
-        return this.guardPlay(attacker, defender, guess);
+        this.guardPlay(attacker, defender, guess);
+      break;
       case 'PRIEST':
-        return this.priestPlay(attacker, defender);
+        this.priestPlay(attacker, defender);
+      break;
       case 'BARON':
-        return this.baronPlay(attacker, defender);
+        this.baronPlay(attacker, defender);
+      break;
       case 'HANDMAID':
-        return this.handmaidPlay(attacker);
+        this.handmaidPlay(attacker);
+      break;
       case 'PRINCE':
-        return this.princePlay(attacker, defender);
+        this.princePlay(attacker, defender);
+      break;
       case 'KING':
-        return this.kingPlay(attacker, defender);
+        this.kingPlay(attacker, defender);
+      break;
       case 'COUNTESS':
-        return this.countessPlay(attacker);
+        this.countessPlay(attacker);
+      break;
       case 'PRINCESS':
+        spamUser(attacker.name, 'You can\'t  actually play the princess!');
+      break;
       default:
-      console.log('wtf');
+        wtf(attacker.name);
     }
   }
 
-  private guardPlay(attacker: Player, defender: Player, guess): [boolean, string, Player] {
+  private guardPlay(attacker: Player, defender: Player, guess): void {
     const defenderHand = defender.getPlayerCard();
     if (defender.isValidCard(guess)) {
       this.removePlayer(defender);
       this.newTurn();
-      return [false, `${attacker.name} guessed correctly! ${defender.name} is out. womp womp.`, null];
+      spamChannel(`${attacker.name} guessed correctly! ${defender.name} is out. womp womp.`);
     }
     this.newTurn();
-    return [false, `${attacker.name} guessed incorrectly!`, null];
+    spamChannel(`${attacker.name} guessed incorrectly!`);
   }
 
-  private priestPlay(attacker: Player, defender: Player): [boolean, string, Player] {
+  private priestPlay(attacker: Player, defender: Player): void {
     const defenderHand = defender.getPlayerCard();
     this.newTurn();
-    return [true, `${defender.name} has a ${defenderHand.name}`, attacker];
+    spamUser(attacker.name,`${defender.name} has a ${defenderHand.name}`);
   }
 
-  private baronPlay(attacker: Player, defender: Player): [boolean, string, Player] {
+  private baronPlay(attacker: Player, defender: Player): void {
     const defenderHand = defender.getPlayerCard();
     const attackerHand = attacker.getPlayerCard();
     if (attackerHand > defenderHand) {
       this.removePlayer(defender);
       this.newTurn();
-      return [false, `${defender.name}'s ${defenderHand.name} was knocked out by ${attacker.name}`, null];
+      spamChannel(`${defender.name}'s ${defenderHand.name} was knocked out by ${attacker.name}`);
     }
     this.removePlayer(attacker);
     this.newTurn();
-    return [false, `${attacker.name}'s ${attackerHand.name} was knocked out by ${defender.name}`, null];
+    spamChannel(`${attacker.name}'s ${attackerHand.name} was knocked out by ${defender.name}`);
   }
 
-  private handmaidPlay(attacker: Player): [boolean, string, Player] {
+  private handmaidPlay(attacker: Player): void{
     attacker.isProtected = true;
     this.newTurn();
-    return [false, `${attacker.name}'s is by protected by a Handmaid until their next turn.`, null];
+    spamChannel(`${attacker.name}'s is by protected by a Handmaid until their next turn.`);
   }
 
-  private princePlay(attacker: Player, defender: Player): [boolean, string, Player] {
+  private princePlay(attacker: Player, defender: Player): void {
     const defenderHand = defender.getPlayerCard();
     if (defenderHand.name === 'Princess') {
       this.removePlayer(defender);
       this.newTurn();
-      return [false, `${defender.name} is knocked out for losing the Princess! womp. womp.`, null];
+      spamChannel(`${defender.name} is knocked out for losing the Princess! womp. womp.`);
     }
     defender.removeCard(defenderHand.name);
     this.dealCardToPlayer(defender);
     this.newTurn();
-    return [false, `${defender.name} dropped their ${defenderHand.name}`, null];
+    spamChannel(`${defender.name} dropped their ${defenderHand.name}`);
   }
 
-  private kingPlay(attacker: Player, defender: Player): [boolean, string, Player] {
+  private kingPlay(attacker: Player, defender: Player): void {
     const defenderHand = defender.getPlayerCard();
     const attackerHand = attacker.getPlayerCard();
     attacker.hand = Array<Card>(defenderHand);
     defender.hand = Array<Card>(attackerHand);
     this.newTurn();
-    return [false, `${defender.name} and ${attacker.name} swapped hands.`, null];
+    spamChannel(`${defender.name} and ${attacker.name} swapped hands.`);
   }
 
-  private countessPlay(attacker: Player): [boolean, string, Player] {
+  private countessPlay(attacker: Player): void {
     this.newTurn();
-    return [false, `${attacker.name} dropped their Countess...`, null];
+    spamChannel(`${attacker.name} dropped their Countess...`);
   }
 }

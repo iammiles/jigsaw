@@ -30,6 +30,11 @@ export const spamUser = (user: string, msg: any): void => {
   jigsaw.postMessageToUser(user, msg);
 }
 
+export const wtf = (user): void => {
+  const luck: boolean = Math.floor(Math.random() * 10) + 1 === 7;
+  spamUser(user, (luck ? 'English Motherfucker! DO YOU SPEAK IT?!' : 'I don\'t under understand that command. Try !commands to see a list of commands.'));
+}
+
 export const helpMsg: string = 'To Learn the rules, type "!rules".\n To see a list of of commands, type "!commands".\n';
 export const commandsMsg: string = `!join - Join a game before it starts
 !start - Start a game

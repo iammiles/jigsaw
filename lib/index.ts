@@ -1,6 +1,6 @@
 import { Game, GameStatus } from './Game';
 import { Player } from './Player';
-import { gameChannel, BOT_SETTINGS, spamChannel, spamUser, helpMsg, rulesMsg, commandsMsg, cardsMsg } from './utilities';
+import { gameChannel, BOT_SETTINGS, spamChannel, spamUser, wtf, helpMsg, rulesMsg, commandsMsg, cardsMsg } from './utilities';
 
 const slackbots = require('slackbots');
 
@@ -26,7 +26,7 @@ jigsaw.on('message', (data) => {
             playerJoined(user, data.user);
           break;
           case '!play':
-            relayPlayInfo(g.parsePlay(g.getPlayerByName(user), command));
+            g.validatePlay(g.getPlayerByName(user), command);
           break;
           case '!quit':
             spamUser(user, 'Goodbye. :-(');
@@ -48,20 +48,12 @@ jigsaw.on('message', (data) => {
             spamUser(user, cardsMsg);
           break;
           default:
-            wtf(user, data);
+            wtf(user);
         }
       }
     })
   }
 });
-
-let whoop = () => {
-  console.log(cardsMsg);
-}
-const wtf = (user, data) => {
-  const luck: boolean = Math.floor(Math.random() * 10) + 1 === 7;
-  spamUser(user, (luck ? 'English Motherfucker! DO YOU SPEAK IT?!' : 'I don\'t under understand that command. Try !commands to see a list of commands.'));
-}
 
 const playerJoined = (user: string, userId: string): void => {
   if (g.players.filter(player => player.name === user).length < 1 && g.gameStatus === GameStatus.PreGame) {
