@@ -64,16 +64,6 @@ const playerJoined = (user: string, userId: string): void => {
   }
 }
 
-const relayPlayInfo = (playInfo: [boolean, string, Player ]): void => {
-  let [isPrivate, msg, player] = playInfo;
-  if (isPrivate) {
-    console.log('spam user player name', player.name);
-    spamUser(player.name, msg);
-  } else {
-    spamChannel(msg);
-  }
-}
-
 const startGame = (isPreGame: boolean): void => {
   if (isPreGame) {
     announcePlayers();
