@@ -1,4 +1,5 @@
 import { Card } from './Card';
+import { shuffle } from './utilities';
 interface ICardTypes {
   name: string,
   qty: number,
@@ -64,7 +65,8 @@ export class Deck {
 
   private initDeck(): void {
     typesOfCards.forEach(card => this.addCardToDeck(card.qty, new Card(card.name, card.value, card.qty, card.description)));
-    this.shuffleAndRemove();
+    this.pile = shuffle(this.pile);
+    this.pile.splice(Math.random() * this.pile.length, 1);
   }
 
   private addCardToDeck(qty, card): void {
@@ -74,18 +76,8 @@ export class Deck {
     }
   }
 
-  /**
-   * Straight up copying http://stackoverflow.com/a/12646864
-   * A clever implementation of the Fisher-Yates shuffle
-   */
-  private shuffleAndRemove(): void {
-    for (let i:number = this.pile.length - 1; i > 0; i--) {
-      let j:number = Math.floor(Math.random() * (i + 1));
-      let temp: Card = this.pile[i];
-      this.pile[i] = this.pile[j];
-      this.pile[j] = temp;
-    }
-    this.pile.splice(Math.random() * this.pile.length, 1);
+  dealCard(): Card {
+    return this.pile.shift();
   }
 
   whatIsDeck(): void {
