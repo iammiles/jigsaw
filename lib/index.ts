@@ -18,7 +18,8 @@ jigsaw.on('start', () => {
 });
 
 jigsaw.on('message', (data) => {
-  if (data.type === 'message' && data.subtype !== 'bot_message' && isNonEmptyMsg(data.text)) {
+  if (data.type === 'message' && data.subtype !== 'bot_message' && isNonEmptyMsg(data.text)
+    && data.channel.charAt(0) !== 'D') {
     Promise.all([isProperChannel(data.channel), getMessenger(data)]).then((res) => {
       const [isGameChannel, user] = res;
       const command = parseCommand(data.text);
@@ -33,6 +34,9 @@ jigsaw.on('message', (data) => {
           break;
           case '!play':
             relayPlayInfo(g.parsePlay(g.getPlayerByName(user), command));
+          break;
+          case '!hand':
+            spamUser(user, g.getPlayerByName(user).getReadablePlayerHand());
           break;
           case '!quit':
           case '!help':
@@ -72,8 +76,9 @@ const playerJoined = (user: string, userId: string): void => {
 }
 
 const relayPlayInfo = (playInfo: [boolean, string, Player ]): void => {
-  const [isPrivate, msg, player] = playInfo;
+  let [isPrivate, msg, player] = playInfo;
   if (isPrivate) {
+    console.log('spam user player name', player.name);
     spamUser(player.name, msg);
   } else {
     spamChannel(msg);

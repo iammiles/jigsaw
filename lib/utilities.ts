@@ -12,7 +12,3 @@ export const shuffle = (arr: Array<any>): Array<any> => {
   }
   return arr;
 }
-
-export const isValidCard = (str: string): boolean => {
-  return typesOfCards.filter(card => card.name.toUpperCase() === str.toUpperCase()).length === 1;
-}
