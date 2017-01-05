@@ -1,15 +1,10 @@
 import { Game, GameStatus } from './Game';
 import { Player } from './Player';
+import { gameChannel, BOT_SETTINGS, spamChannel, spamUser, helpMsg, rulesMsg, commandsMsg, cardsMsg } from './utilities';
 
 const slackbots = require('slackbots');
 
-const gameChannel: string = 'flux';
-const bot_settings = {
-  name: 'jigsaw',
-  token: 'xoxb-14894531971-nPmaw4gT0m3T8qAeaYZ6HXze',
-}
-
-const jigsaw = new slackbots(bot_settings);
+export const jigsaw = new slackbots(BOT_SETTINGS);
 
 const g = new Game();
 
@@ -18,13 +13,11 @@ jigsaw.on('start', () => {
 });
 
 jigsaw.on('message', (data) => {
-  if (data.type === 'message' && data.subtype !== 'bot_message' && isNonEmptyMsg(data.text)
-    && data.channel.charAt(0) !== 'D') {
+  if (data.type === 'message' && data.subtype !== 'bot_message' && isNonEmptyMsg(data.text)) {
     Promise.all([isProperChannel(data.channel), getMessenger(data)]).then((res) => {
       const [isGameChannel, user] = res;
       const command = parseCommand(data.text);
-
-      if (isGameChannel && command[0].charAt(0) === '!') {
+      if ((isGameChannel || data.channel.charAt(0) === 'D') && command[0].charAt(0) === '!') {
         switch(command[0]) {
           case '!start':
             startGame(g.gameStatus === GameStatus.PreGame);
@@ -35,13 +28,25 @@ jigsaw.on('message', (data) => {
           case '!play':
             relayPlayInfo(g.parsePlay(g.getPlayerByName(user), command));
           break;
+          case '!quit':
+            spamUser(user, 'Goodbye. :-(');
+            g.removePlayer(g.getPlayerByName(user));
+          break;
           case '!hand':
             spamUser(user, g.getPlayerByName(user).getReadablePlayerHand());
           break;
-          case '!quit':
           case '!help':
+            spamUser(user, helpMsg);
+          break;
           case '!rules':
+            spamUser(user, rulesMsg);
+          break;
           case '!commands':
+            spamUser(user, commandsMsg);
+          break;
+          case '!cards':
+            spamUser(user, cardsMsg);
+          break;
           default:
             wtf(user, data);
         }
@@ -50,21 +55,13 @@ jigsaw.on('message', (data) => {
   }
 });
 
+let whoop = () => {
+  console.log(cardsMsg);
+}
 const wtf = (user, data) => {
-//  console.log('text', data.text);
-  g.players.forEach((player) => {
-   // console.log('player', player)
-    //console.log('hand', player.hand);
-  })
- // console.log('dec', g.deck.pile.length);
   const luck: boolean = Math.floor(Math.random() * 10) + 1 === 7;
   spamUser(user, (luck ? 'English Motherfucker! DO YOU SPEAK IT?!' : 'I don\'t under understand that command. Try !commands to see a list of commands.'));
 }
-
-// const determineWinner = (): void => {
-//   const winner = g.gameOver();
-//   spamChannel(`${winner.name} gets to bang the Princes... erm, Wins a token of affection Her Majesty!`);
-// }
 
 const playerJoined = (user: string, userId: string): void => {
   if (g.players.filter(player => player.name === user).length < 1 && g.gameStatus === GameStatus.PreGame) {
@@ -113,6 +110,10 @@ const getMessenger = async (data): Promise<any> => {
 }
 
 const isProperChannel = async (id: string): Promise<any> => {
+  // @todo proper error handling, but really, who can resist big D's?
+  if (id.charAt(0) === 'D') {
+    return await false;
+  }
   const channel = await jigsaw.getChannelById(id);
   return gameChannel === channel.name;
 }
@@ -121,10 +122,7 @@ const parseCommand = (msg: string): Array<string> => {
   return msg.split(' ');
 }
 
-const spamChannel = (msg: string): void => {
-  jigsaw.postMessageToChannel(gameChannel, msg);
-}
-
-const spamUser = (user: string, msg: string): void => {
-  jigsaw.postMessageToUser(user, msg);
-}
+//@todo
+// proper onMessage handling
+//everyone is handmaidened
+//edge cases

@@ -1,7 +1,7 @@
 import { Deck } from './Deck';
 import { Card } from './Card';
 import { Player } from './Player';
-import { shuffle } from './utilities';
+import { shuffle, spamUser, spamChannel } from './utilities';
 
 export const enum GameStatus {
   PreGame,
@@ -27,7 +27,7 @@ export class Game {
   }
 
   removePlayer(p: Player): void {
-    this.players.filter(player => player.name != p.name);
+    this.players = this.players.filter(player => player.name != p.name);
   }
 
   startGame(): void {
@@ -40,13 +40,12 @@ export class Game {
 
   newTurn(): void {
     if (this.players.length === 1) {
-      this.gameOver();
+      this.endGame();
       return;
     }
     const oldPlayer = this.players.shift();
     oldPlayer.isTurn = false;
     this.players[0].isTurn = true;
-    console.log('current turn', this.players[0]);
     this.dealCardToPlayer(this.players[0])
     this.players.push(oldPlayer);
   }
@@ -61,8 +60,7 @@ export class Game {
     if (this.deck.pile.length !== 0) {
       p.hand.push(this.deck.dealCard());
     } else {
-      console.log('no more cards in deck');
-      this.gameOver();
+      this.endGame();
     }
   }
 
@@ -71,8 +69,7 @@ export class Game {
     return this.players.sort((a, b) => b.highestValueCard().value - a.highestValueCard().value).shift();
   }
 
-  gameOver(): Player {
-    this.endGame();
+  getWinRar(): Player {
     if (this.players.length === 1) {
       return this.players[0];
     } else {
@@ -81,25 +78,28 @@ export class Game {
   }
 
   endGame(): void {
+    const winrar = this.getWinRar();
+    spamChannel(`${winrar.name} gets to bang the Princes... erm, Wins a token of affection Her Majesty!`);
     this.gameStatus = GameStatus.GameEnd;
   }
 
   parsePlay(attacker: Player, cmd: Array<string>): [boolean, string, Player] {
     //@todo check if it's actually attacker's turn && make this work
     if (this.gameStatus !== GameStatus.GameStart) return [true, 'Game has not started yet!', attacker];
+    if (!attacker.isTurn) return [true, 'It\'s not your turn!', attacker];
     let [, cardName, defenderId, guess] = cmd;
-    let msg: string = '';
      // Validate cardName
     console.log('attacker at parse play', attacker);
     console.log('card valid', attacker.isValidCard(cardName));
     if (!Boolean(cardName.trim()) || !attacker.isValidCard(cardName)) return [true, 'You picked an invalid card!', attacker];
 
     // Validate defender
-    // @todo check if defender is protected
+    // @todo check if all defenders are protected and defender isn't attacker for all cases except prince
     if (defenderId) {
       defenderId = defenderId.slice(2, -1);
+      console.log('defender id', defenderId);
       const defender: Player = this.getPlayerById(defenderId);
-      if (!defender || (defender === attacker && cardName.toUpperCase() !== 'PRINCE')) return [true, 'You picked an invalid opponent!', attacker];
+      if (!defender || defender.isProtected) return [true, 'You picked an invalid opponent!', attacker];
       return this.resolvePlay(attacker, cardName, defender, guess)
     }
     
@@ -152,6 +152,7 @@ export class Game {
       this.newTurn();
       return [false, `${attacker.name} guessed correctly! ${defender.name} is out. womp womp.`, null];
     }
+    this.newTurn();
     return [false, `${attacker.name} guessed incorrectly!`, null];
   }
 
@@ -165,11 +166,13 @@ export class Game {
     const defenderHand = defender.getPlayerCard();
     const attackerHand = attacker.getPlayerCard();
     if (attackerHand > defenderHand) {
+      this.removePlayer(defender);
       this.newTurn();
       return [false, `${defender.name}'s ${defenderHand.name} was knocked out by ${attacker.name}`, null];
     }
+    this.removePlayer(attacker);
     this.newTurn();
-    return [false, `${attacker.name}'s ${attacker.name} was knocked out by ${defender.name}`, null];
+    return [false, `${attacker.name}'s ${attackerHand.name} was knocked out by ${defender.name}`, null];
   }
 
   private handmaidPlay(attacker: Player): [boolean, string, Player] {

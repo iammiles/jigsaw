@@ -35,6 +35,6 @@ export class Player {
   }
 
   isValidCard(str: string): boolean {
-    return this.hand.filter(card => card.name.toUpperCase() === str.toUpperCase()).length === 1;
+    return this.hand.some(card => card.name.toUpperCase() === str.toUpperCase());
   }
 }
