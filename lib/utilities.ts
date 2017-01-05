@@ -1,12 +1,13 @@
 import { Card, typesOfCards } from './Card';
 import { jigsaw } from './index';
+import { GAME_CHANNEL, BOT_NAME, BOT_TOKEN } from './settings';
 
 export const BOT_SETTINGS = {
-  name: 'jigsaw',
-  token: 'xoxb-14894531971-nPmaw4gT0m3T8qAeaYZ6HXze',
+  name: BOT_NAME,
+  token: BOT_TOKEN,
 };
 
-export const gameChannel: string = 'flux';
+export const gameChannel: string = GAME_CHANNEL;
 
 /**
  * Straight up copying http://stackoverflow.com/a/12646864
