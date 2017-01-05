@@ -9,7 +9,7 @@ export const jigsaw = new slackbots(BOT_SETTINGS);
 const g = new Game();
 
 jigsaw.on('start', () => {
-  spamChannel('Do you want to play a game?\nType "!join" or "!help" to get started.');
+  spamChannel('I want to play a game.\nType "!join" or "!help" to get started.');
 });
 
 jigsaw.on('message', (data) => {
