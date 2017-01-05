@@ -4,10 +4,10 @@ Jigsaw slackbot implementation of the game [Love Letter](https://boardgamegeek.c
 
 ## Installation
 
-First you need to create a bot and get its token from slack.  This can be done [here](https://my.slack.com/services/new/bot).
-Next edit `./lib/settings.ts` and give it an appropriate channel name, bot name, and the token you created earlier.
-After that just push to whatever node environment you have set up, run `npm install` to get the dependencies.
-Finally run `npm run start` to start up the bot! If all is successful it'll let itself known in the game channel you specified.
+* First you need to create a bot and get its token from slack.  This can be done [here](https://my.slack.com/services/new/bot).
+* Edit `./lib/settings.ts` and give it an appropriate channel name, bot name, and the token you created earlier.
+* Push to whatever node environment you have set up, run `npm install` to get the dependencies.
+* Finally run `npm run start` to start up the bot! If all is successful it'll let itself known in the game channel you specified.
 
 
 ## TODO / Roadmap
