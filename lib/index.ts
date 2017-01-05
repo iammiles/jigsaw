@@ -17,6 +17,7 @@ jigsaw.on('message', (data) => {
     Promise.all([isProperChannel(data.channel), getMessenger(data)]).then((res) => {
       const [isGameChannel, user] = res;
       const command = parseCommand(data.text);
+
       if (isGameChannel && command[0].charAt(0) === '!') {
         switch(command[0]) {
           case '!start':
@@ -51,7 +52,7 @@ jigsaw.on('message', (data) => {
             wtf(user);
         }
       }
-    })
+    });
   }
 });
 
