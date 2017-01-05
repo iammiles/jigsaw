@@ -1,3 +1,4 @@
+import { Card, typesOfCards } from './Card';
 /**
  * Straight up copying http://stackoverflow.com/a/12646864
  * A clever implementation of the Fisher-Yates shuffle
@@ -10,4 +11,8 @@ export const shuffle = (arr: Array<any>): Array<any> => {
     arr[j] = temp;
   }
   return arr;
+}
+
+export const isValidCard = (str: string): boolean => {
+  return typesOfCards.filter(card => card.name.toUpperCase() === str.toUpperCase()).length === 1;
 }

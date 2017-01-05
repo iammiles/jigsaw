@@ -15,4 +15,8 @@ export class Player {
     this.isOut = false;
     this.hand = [];
   }
+
+  highestValueCard(): Card {
+    return this.hand[0];
+  }
 }
