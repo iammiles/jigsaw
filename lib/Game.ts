@@ -195,8 +195,6 @@ export class Game {
   private baronPlay(attacker: Player, defender: Player): void {
     const defenderHand = defender.getPlayerCard();
     const attackerHand = attacker.getPlayerCard();
-    console.log('defhand', defenderHand);
-    console.log('attackhand', attackerHand);
 
     if (attackerHand.value > defenderHand.value) {
       this.removePlayer(defender);
