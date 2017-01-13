@@ -82,7 +82,7 @@ export class Game {
 
   endGame(): void {
     const winrar = this.getWinRar();
-    spamChannel(`${winrar.name} gets to bang the Princes... erm, Wins a token of affection Her Majesty!`);
+    spamChannel(`${winrar.name} gets to bang the Princes... erm, Wins a token of affection from Her Majesty!`);
     this.gameStatus = GameStatus.GameEnd;
   }
 
@@ -195,14 +195,18 @@ export class Game {
   private baronPlay(attacker: Player, defender: Player): void {
     const defenderHand = defender.getPlayerCard();
     const attackerHand = attacker.getPlayerCard();
-    if (attackerHand > defenderHand) {
+    console.log('defhand', defenderHand);
+    console.log('attackhand', attackerHand);
+
+    if (attackerHand.value > defenderHand.value) {
       this.removePlayer(defender);
       this.newTurn();
       spamChannel(`${defender.name}'s ${defenderHand.name} was knocked out by ${attacker.name}`);
+    } else {
+      this.removePlayer(attacker);
+      this.newTurn();
+      spamChannel(`${attacker.name}'s ${attackerHand.name} was knocked out by ${defender.name}`);
     }
-    this.removePlayer(attacker);
-    this.newTurn();
-    spamChannel(`${attacker.name}'s ${attackerHand.name} was knocked out by ${defender.name}`);
   }
 
   private handmaidPlay(attacker: Player): void{
@@ -213,15 +217,14 @@ export class Game {
 
   private princePlay(attacker: Player, defender: Player): void {
     const defenderHand = defender.getPlayerCard();
-    if (defenderHand.name === 'Princess') {
-      this.removePlayer(defender);
-      this.newTurn();
-      spamChannel(`${defender.name} is knocked out for losing the Princess! womp. womp.`);
-    }
     defender.removeCard(defenderHand.name);
     this.dealCardToPlayer(defender);
     this.newTurn();
     spamChannel(`${defender.name} dropped their ${defenderHand.name}`);
+    if (defenderHand.name === 'Princess') {
+      this.removePlayer(defender);
+      spamChannel(`${defender.name} is knocked out for losing the Princess! womp. womp.`);
+    }
   }
 
   private kingPlay(attacker: Player, defender: Player): void {
