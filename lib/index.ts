@@ -18,7 +18,7 @@ jigsaw.on('message', (data) => {
       const [isGameChannel, user] = res;
       const command = parseCommand(data.text);
 
-      if (isGameChannel && command[0].charAt(0) === '!') {
+      if ((isGameChannel || data.channel.charAt(0) === 'D') && command[0].charAt(0) === '!') {
         switch(command[0]) {
           case '!start':
             startGame(g.gameStatus === GameStatus.PreGame);
