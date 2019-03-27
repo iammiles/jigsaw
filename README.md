@@ -11,11 +11,9 @@ Jigsaw slackbot implementation of the game [Love Letter](https://boardgamegeek.c
 
 
 ## TODO / Roadmap
-* Restrict number of players to 7.
-* Allow for multiple rounds to collect tokens of affection (i.e. bang cubes) like the original
-* Decouple some functionality to allow jigsaw to play multiple games.
-* Some sort of persistence to keep track of statistics and allow for saved games.
 * ** TESTS **
+* Restrict number of players to 7.
+* Allow for multiple rounds to collect tokens of affection like the original
 
 **This is very much a work in progress. There are probably a few bugs and edge cases not accounted for.**
 
