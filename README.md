@@ -17,10 +17,6 @@ Jigsaw slackbot implementation of the game [Love Letter](https://boardgamegeek.c
 
 **This is very much a work in progress. There are probably a few bugs and edge cases not accounted for.**
 
-## Tests
-
-This should really get done.
-
 ## License
 
 MIT
